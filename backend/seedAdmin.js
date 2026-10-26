@@ -3,7 +3,7 @@ const dotenv = require("dotenv");
 const bcrypt = require("bcryptjs");
 const User = require("./models/userModel.js");
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const url = process.env.MONGODB_URL;
 

@@ -5,7 +5,7 @@ const GitHubStrategy = require("passport-github2").Strategy;
 
 const User = require("../models/userModel.js");
 const dotenv = require("dotenv");
-dotenv.config();
+dotenv.config({ quiet: true });
 
 passport.use(
     new GoogleStrategy(

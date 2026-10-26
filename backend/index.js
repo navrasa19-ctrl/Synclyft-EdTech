@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const { MongoStore } = require('connect-mongo');
 
 const passport = require('passport');
 require('./config/passport.js');
@@ -80,14 +81,30 @@ app.use(sanitizeRequest);
 app.use(requestLogger);
 
 
+// Database connection — started early so the session store can share the client.
+const dbConnection = mongoose.connect(process.env.MONGODB_URL);
+
+// Auth is JWT-based; the session only carries the OAuth `state` across the
+// provider redirect (LinkedIn uses state: true). Persisting it in Mongo instead
+// of the default MemoryStore keeps it across restarts / multiple instances and
+// stops the per-process memory leak.
+const SESSION_TTL_SECONDS = 15 * 60;
 app.use(session({
+    name: 'synclyft.sid',
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        clientPromise: dbConnection.then((m) => m.connection.getClient()),
+        collectionName: 'sessions',
+        ttl: SESSION_TTL_SECONDS,
+        touchAfter: 60,
+    }),
     cookie: {
         secure: process.env.NODE_ENV === 'production', // Production me HTTPS mandatory hai
         httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000 // 24 Hours
+        sameSite: 'lax', // must survive the top-level redirect back from the OAuth provider
+        maxAge: SESSION_TTL_SECONDS * 1000
     }
 }));
 
@@ -97,8 +114,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Database connection
-mongoose.connect(process.env.MONGODB_URL)
+dbConnection
     .then(async () => {
         logger.info('MongoDB connected successfully');
         emailProcessor.start();

@@ -25,12 +25,14 @@ userRouter.get("/google/callback", passport.authenticate("google", {
 // Login with LinkedIn (OAuth)
 userRouter.get("/linkedin", passport.authenticate("linkedin"));
 userRouter.get("/linkedin/callback", passport.authenticate("linkedin", {
+    session: false,
     failureRedirect: `${process.env.FRONTEND_URL}/login?error=linkedin_failed`
 }), linkedinAuthCallback);
 
 // Login with Github (OAuth)
 userRouter.get("/github", passport.authenticate("github", { scope: ['user:email'] }));
 userRouter.get("/github/callback", passport.authenticate("github", {
+    session: false,
     failureRedirect: `${process.env.FRONTEND_URL}/login?error=github_failed`
 }), githubAuthCallback);
 

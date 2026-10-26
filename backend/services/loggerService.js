@@ -1,7 +1,7 @@
 const winston = require('winston');
 const { Logtail } = require('@logtail/node');
 const { LogtailTransport } = require('@logtail/winston');
-require('dotenv').config();
+require('dotenv').config({ quiet: true });
 
 const format = winston.format.combine(
   winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
