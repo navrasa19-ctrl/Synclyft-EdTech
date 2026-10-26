@@ -3,7 +3,6 @@
   "framework": "nextjs",
   "installCommand": "cd ../.. && npm ci",
   "buildCommand": "cd ../.. && npx turbo run build --filter=@synclyft/admin",
-  "ignoreCommand": "npx turbo-ignore --fallback=HEAD^1",
   "regions": ["bom1"],
   "headers": [
     {
